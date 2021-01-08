@@ -31,5 +31,6 @@ dependencies:
     - pytz==2020.5
     - six==1.15.0
     - werkzeug==1.0.1
+    - yapf==0.30.0
 prefix: /opt/anaconda3/envs/UBS_BE
 
