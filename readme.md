@@ -14,3 +14,8 @@
 
 1. Run `conda activate UBS_BE`
 2. Run `python app.py`
+
+## How to kill running Flask app on port?
+
+1. Run `lsof -i:5000` and note the PID
+2. Run `kill -9 {PID}`
