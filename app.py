@@ -38,4 +38,5 @@ def get_startup_list():
     return startup_list
 
 
-app.run(debug=True)
+if __name__ == '__main__':
+    app.run()
