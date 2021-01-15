@@ -1,5 +1,6 @@
 import time
 from flask import Flask, request
+from flask_cors import CORS
 import pandas as pd
 from parser import seriesToDict
 from random import randrange
@@ -9,6 +10,7 @@ startups = pd.read_csv("csv/hitech_startups.csv")
 print("done reading csv")
 
 app = Flask(__name__)
+CORS(app, origins=[r'http://localhost:.*', r'^https:\/\/temg4952a-team1-.*.web\.app'])
 
 
 @app.route("/time")
