@@ -18,9 +18,8 @@ def get_current_time():
     return {"time": time.time()}
 
 
-@app.route("/get_startup")
-def get_startup():
-    uuid = request.get_json()["uuid"]
+@app.route("/get_startup/<uuid>")
+def get_startup(uuid):
     startup_row = startups[startups["uuid"] == uuid].iloc[0]
     startup_info = seriesToDict(startup_row)
     return startup_info
