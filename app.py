@@ -32,7 +32,7 @@ def get_startup_list():
         index = randrange(0, len(startups))
         startup_row = startups.iloc[index][[
             'uuid', 'name', 'rank', 'homepage_url', 'category_groups_list',
-            'total_funding_usd', 'employee_count', 'logo_url', 'country'
+            'num_funding_rounds', 'total_funding_usd', 'employee_count', 'logo_url', 'country'
         ]]
         startup_info = seriesToDict(startup_row)
         startup_list[num] = startup_info
