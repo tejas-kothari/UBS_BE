@@ -19,3 +19,4 @@
 
 1. Run `lsof -i:5000` and note the PID
 2. Run `kill -9 {PID}`
+   **Shorthand:** `kill -9 $(lsof -t -i:5000)`
