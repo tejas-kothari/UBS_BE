@@ -1,4 +1,5 @@
 import time
+import ast
 from flask import Flask, request
 from flask_cors import CORS
 import pandas as pd
@@ -33,7 +34,16 @@ def get_startup():
 def get_startup_funding():
     uuid = request.args.get('uuid')
     funding_df = funding[funding["org_uuid"] == uuid]
+    investors = funding_df['investors']
+    funding_df = funding_df.drop('investors', axis=1)
+
     funding_info = dfToDict(funding_df)
+    for index, investor in investors.items():
+        if not pd.isnull(investor):
+            funding_info[index]['investor'] = ast.literal_eval(investor)
+        else:
+            funding_info[index]['investor'] = ""
+
     return funding_info
 
 
