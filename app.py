@@ -1,5 +1,5 @@
 import time
-import ast
+import re
 from flask import Flask, request
 from flask_cors import CORS
 import pandas as pd
@@ -81,7 +81,8 @@ def get_startup_list():
         startup_list = startup_list[
             startup_list['category_groups_list'].str.contains(filterCategory)]
     if search:
-        startup_list = startup_list[startup_list['name'].str.contains(search)]
+        startup_list = startup_list[startup_list['name'].str.contains(
+            search, flags=re.IGNORECASE)]
 
     totalNumFilteredStartups = len(startup_list)
     startup_payload = {'totalNumStartups': totalNumFilteredStartups}
