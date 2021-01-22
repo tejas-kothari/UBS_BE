@@ -9,6 +9,8 @@ from random import randrange
 print("reading csv...")
 startups = pd.read_csv("csv/hitech_startups.csv")
 funding = pd.read_csv("csv/hitech_funding.csv")
+funding['lead_investor_uuids'] = funding['lead_investor_uuids'].str.split(',')
+investors = pd.read_csv("csv/hitech_investors.csv")
 print("done reading csv")
 
 app = Flask(__name__)
@@ -34,15 +36,19 @@ def get_startup():
 def get_startup_funding():
     uuid = request.args.get('uuid')
     funding_df = funding[funding["org_uuid"] == uuid]
-    investors = funding_df['investors']
-    funding_df = funding_df.drop('investors', axis=1)
-
+    investors_uuids = funding_df['lead_investor_uuids']
+    funding_df = funding_df.drop('lead_investor_uuids', axis=1)
     funding_info = dfToDict(funding_df)
-    for index, investor in investors.items():
-        if not pd.isnull(investor):
-            funding_info[index]['investor'] = ast.literal_eval(investor)
-        else:
-            funding_info[index]['investor'] = ""
+
+    for index, investors_uuids_array in investors_uuids.iteritems():
+        investor_info = {}
+        if not isinstance(investors_uuids_array, float):
+            for array_index, investors_uuid in enumerate(
+                    investors_uuids_array):
+                investor_info[array_index] = seriesToDict(
+                    investors[investors['uuid'] == investors_uuid].iloc[0])
+
+        funding_info[index]['investors'] = investor_info
 
     return funding_info
 
