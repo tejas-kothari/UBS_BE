@@ -55,17 +55,43 @@ def get_startup_funding():
 
 @app.route("/get_startup_list")
 def get_startup_list():
-    startup_list = {}
-    for num in range(0, 50):
-        index = randrange(0, len(startups))
-        startup_row = startups.iloc[index][[
-            'uuid', 'name', 'rank', 'homepage_url', 'category_groups_list',
-            'num_funding_rounds', 'total_funding_usd', 'employee_count',
-            'logo_url', 'country', 'last_funding_round'
-        ]]
-        startup_info = seriesToDict(startup_row)
-        startup_list[num] = startup_info
-    return startup_list
+    page = int(request.args.get('page'))
+    rowsPerPage = int(request.args.get('rowsPerPage'))
+    search = request.args.get('search')
+    filterCategory = request.args.get('filterCategory')
+    filterCountry = request.args.get('filterCountry')
+    filterPhase = request.args.get('filterPhase')
+    filterSize = request.args.get('filterSize')
+
+    startup_list = startups.copy()[[
+        'uuid', 'name', 'rank', 'homepage_url', 'category_groups_list',
+        'num_funding_rounds', 'total_funding_usd', 'employee_count',
+        'logo_url', 'country', 'last_funding_round'
+    ]]
+
+    if filterSize:
+        startup_list = startup_list[startup_list['employee_count'] ==
+                                    filterSize]
+    if filterPhase:
+        startup_list = startup_list[startup_list['last_funding_round'] ==
+                                    filterPhase]
+    if filterCountry:
+        startup_list = startup_list[startup_list['country'] == filterCountry]
+    if filterCategory:
+        startup_list = startup_list[
+            startup_list['category_groups_list'].str.contains(filterCategory)]
+    if search:
+        startup_list = startup_list[startup_list['name'].str.contains(search)]
+
+    totalNumFilteredStartups = len(startup_list)
+    startup_payload = {'totalNumStartups': totalNumFilteredStartups}
+
+    if totalNumFilteredStartups > rowsPerPage:
+        startup_list = startup_list[rowsPerPage * (page - 1):rowsPerPage *
+                                    page]
+    startup_payload['filteredStartups'] = dfToDict(startup_list)
+
+    return startup_payload
 
 
 if __name__ == '__main__':
