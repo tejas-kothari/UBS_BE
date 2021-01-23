@@ -95,5 +95,17 @@ def get_startup_list():
     return startup_payload
 
 
+@app.route("/get_country_data")
+def get_country_data():
+    count_data = startups.groupby('country').count()[['uuid']]
+    funding_data = startups.groupby('country').mean()[['total_funding_usd']]
+    country_data = count_data.join(funding_data)
+    country_data = country_data.rename(columns={
+        "uuid": "num",
+        "total_funding_usd": "mean_funding"
+    })
+    return dfToDict(country_data)
+
+
 if __name__ == '__main__':
     app.run(debug=True)
