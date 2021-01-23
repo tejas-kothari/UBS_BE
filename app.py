@@ -107,5 +107,19 @@ def get_country_data():
     return dfToDict(country_data)
 
 
+@app.route("/get_round_data")
+def get_round_data():
+    count_data = startups.groupby('last_funding_round').count()[['uuid']]
+    funding_data = startups.groupby('last_funding_round').mean()[[
+        'total_funding_usd'
+    ]]
+    round_data = count_data.join(funding_data)
+    round_data = round_data.rename(columns={
+        "uuid": "num",
+        "total_funding_usd": "mean_funding"
+    })
+    return dfToDict(round_data)
+
+
 if __name__ == '__main__':
     app.run(debug=True)
