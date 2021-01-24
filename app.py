@@ -4,13 +4,14 @@ from flask import Flask, request
 from flask_cors import CORS
 import pandas as pd
 from parser import seriesToDict, dfToDict
-from random import randrange
+import random
 
 print("reading csv...")
 startups = pd.read_csv("csv/hitech_startups.csv")
 funding = pd.read_csv("csv/hitech_funding.csv")
 funding['lead_investor_uuids'] = funding['lead_investor_uuids'].str.split(',')
 investors = pd.read_csv("csv/hitech_investors.csv")
+model_values = pd.read_csv("csv/model_values.csv")
 print("done reading csv")
 
 app = Flask(__name__)
@@ -51,6 +52,41 @@ def get_startup_funding():
         funding_info[index]['investors'] = investor_info
 
     return funding_info
+
+
+@app.route("/get_startup_features")
+def get_startup_features():
+    uuid = request.args.get('uuid')
+    startup_features_row = model_values[model_values["org_uuid"] ==
+                                        uuid].iloc[0]
+    startup_features = seriesToDict(startup_features_row)
+    return startup_features
+
+
+@app.route("/get_features")
+def get_features():
+    x = request.args.get('x_axis')
+    y = request.args.get('y_axis')
+
+    total_num_values = len(model_values)
+    selected_index = [0, total_num_values - 1]
+    for percentile in range(1, 4):
+        possible_values = range(
+            int(1 + (percentile - 1) * 0.25 * total_num_values),
+            int(1 + percentile * 0.25 * total_num_values))
+        selected_index = selected_index + random.sample(possible_values, 66)
+
+    mask = []
+    for index in range(len(model_values)):
+        if index in selected_index:
+            mask.append(True)
+        else:
+            mask.append(False)
+
+    scatter_values_df = model_values.sort_values(x).reset_index()[[
+        'name', x, y
+    ]][mask]
+    return dfToDict(scatter_values_df)
 
 
 @app.route("/get_startup_list")
