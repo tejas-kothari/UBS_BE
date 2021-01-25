@@ -100,7 +100,7 @@ def get_startup_list():
     filterSize = request.args.get('filterSize')
 
     startup_list = startups.copy()[[
-        'uuid', 'name', 'rank', 'homepage_url', 'category_groups_list',
+        'uuid', 'name', 'diff', 'rank', 'homepage_url', 'category_groups_list',
         'num_funding_rounds', 'total_funding_usd', 'employee_count',
         'logo_url', 'country', 'last_funding_round'
     ]]
