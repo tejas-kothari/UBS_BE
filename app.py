@@ -84,7 +84,7 @@ def get_features():
             mask.append(False)
 
     scatter_values_df = model_values.sort_values(x).reset_index()[[
-        'name', x, y
+        'org_uuid', 'name', x, y
     ]][mask]
     return dfToDict(scatter_values_df)
 
