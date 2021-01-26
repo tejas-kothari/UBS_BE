@@ -165,6 +165,20 @@ def get_round_data():
     return dfToDict(round_data)
 
 
+@app.route("/get_feature_importance")
+def get_feature_importance():
+    model = {}
+    model[1] = pd.read_csv("csv/model1_importance.csv")
+    model[2] = pd.read_csv("csv/model2_importance.csv")
+    model[3] = pd.read_csv("csv/model3_importance.csv")
+
+    importance = {}
+    for index in model:
+        importance[index] = seriesToDict(model[index].iloc[0])
+
+    return importance
+
+
 def findGroupIndex(uuid):
     for index in range(1, 4):
         if predictions[index]['org_uuid'].str.contains(uuid).any():
