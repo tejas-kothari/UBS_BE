@@ -62,8 +62,7 @@ def get_startup_features():
     uuid = request.args.get('uuid')
 
     startup_group_index = findGroupIndex(uuid)
-    print('startup_group_index')
-    print(startup_group_index)
+
     startup_features_row = predictions[startup_group_index][
         predictions[startup_group_index]["org_uuid"] == uuid].iloc[0]
     startup_features = seriesToDict(startup_features_row)
