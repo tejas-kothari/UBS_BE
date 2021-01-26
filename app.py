@@ -3,6 +3,7 @@ import re
 from flask import Flask, request
 from flask_cors import CORS
 import pandas as pd
+import numpy as np
 from parser import seriesToDict, dfToDict
 import random
 
@@ -77,23 +78,31 @@ def get_features():
 
     startup_group_index = findGroupIndex(uuid)
 
-    total_num_values = len(predictions[startup_group_index])
+    filtered_features = predictions[startup_group_index][
+        predictions[startup_group_index][x] != 0]
+
+    total_num_values = len(filtered_features)
     selected_index = [0, total_num_values - 1]
     for percentile in range(1, 4):
         possible_values = range(
-            int(1 + (percentile - 1) * 0.25 * total_num_values),
-            int(1 + percentile * 0.25 * total_num_values))
-        selected_index = selected_index + random.sample(possible_values, 66)
+            int(1 + (percentile - 1) * 0.33 * total_num_values),
+            int(1 + percentile * 0.33 * total_num_values))
+
+        totalTertile = len(possible_values)
+        valuesPerTertile = 66 if totalTertile > 66 else totalTertile
+        selected_index = selected_index + random.sample(
+            possible_values, valuesPerTertile)
 
     mask = []
-    for index in range(len(predictions[startup_group_index])):
+    for index in range(total_num_values):
         if index in selected_index:
             mask.append(True)
         else:
             mask.append(False)
 
-    scatter_values_df = predictions[startup_group_index].sort_values(
-        x).reset_index()[['org_uuid', 'name', x, y]][mask]
+    scatter_values_df = filtered_features.sort_values(x)[[
+        'org_uuid', 'name', x, y
+    ]][mask].reset_index()
     return dfToDict(scatter_values_df)
 
 
@@ -185,7 +194,7 @@ def get_feature_importance():
 
 
 def findGroupIndex(uuid):
-    for index in range(1, 4):
+    for index in predictions:
         if predictions[index]['org_uuid'].str.contains(uuid).any():
             return index
 
