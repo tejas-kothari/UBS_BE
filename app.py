@@ -11,7 +11,10 @@ startups = pd.read_csv("csv/hitech_startups.csv")
 funding = pd.read_csv("csv/hitech_funding.csv")
 funding['lead_investor_uuids'] = funding['lead_investor_uuids'].str.split(',')
 investors = pd.read_csv("csv/hitech_investors.csv")
-model_values = pd.read_csv("csv/model_values.csv")
+predictions = {}
+predictions[1] = pd.read_csv("csv/predictions_1.csv")
+predictions[2] = pd.read_csv("csv/predictions_2.csv")
+predictions[3] = pd.read_csv("csv/predictions_3.csv")
 print("done reading csv")
 
 app = Flask(__name__)
@@ -57,18 +60,25 @@ def get_startup_funding():
 @app.route("/get_startup_features")
 def get_startup_features():
     uuid = request.args.get('uuid')
-    startup_features_row = model_values[model_values["org_uuid"] ==
-                                        uuid].iloc[0]
+
+    startup_group_index = findGroupIndex(uuid)
+    print('startup_group_index')
+    print(startup_group_index)
+    startup_features_row = predictions[startup_group_index][
+        predictions[startup_group_index]["org_uuid"] == uuid].iloc[0]
     startup_features = seriesToDict(startup_features_row)
     return startup_features
 
 
 @app.route("/get_features")
 def get_features():
+    uuid = request.args.get('uuid')
     x = request.args.get('x_axis')
     y = request.args.get('y_axis')
 
-    total_num_values = len(model_values)
+    startup_group_index = findGroupIndex(uuid)
+
+    total_num_values = len(predictions[startup_group_index])
     selected_index = [0, total_num_values - 1]
     for percentile in range(1, 4):
         possible_values = range(
@@ -77,15 +87,14 @@ def get_features():
         selected_index = selected_index + random.sample(possible_values, 66)
 
     mask = []
-    for index in range(len(model_values)):
+    for index in range(len(predictions[startup_group_index])):
         if index in selected_index:
             mask.append(True)
         else:
             mask.append(False)
 
-    scatter_values_df = model_values.sort_values(x).reset_index()[[
-        'org_uuid', 'name', x, y
-    ]][mask]
+    scatter_values_df = predictions[startup_group_index].sort_values(
+        x).reset_index()[['org_uuid', 'name', x, y]][mask]
     return dfToDict(scatter_values_df)
 
 
@@ -155,6 +164,12 @@ def get_round_data():
         "total_funding_usd": "mean_funding"
     })
     return dfToDict(round_data)
+
+
+def findGroupIndex(uuid):
+    for index in range(1, 4):
+        if predictions[index]['org_uuid'].str.contains(uuid).any():
+            return index
 
 
 if __name__ == '__main__':
