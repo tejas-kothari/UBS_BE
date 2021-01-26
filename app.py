@@ -102,7 +102,7 @@ def get_startup_list():
     page = int(request.args.get('page'))
     rowsPerPage = int(request.args.get('rowsPerPage'))
     search = request.args.get('search')
-    filterCategory = request.args.get('filterCategory')
+    filterCategory = request.args.get('filterCategory').replace(',', '|')
     filterCountry = request.args.get('filterCountry')
     filterPhase = request.args.get('filterPhase')
     filterSize = request.args.get('filterSize')
@@ -114,13 +114,17 @@ def get_startup_list():
     ]]
 
     if filterSize:
-        startup_list = startup_list[startup_list['employee_count'] ==
-                                    filterSize]
+        filterSize = filterSize.split(',')
+        startup_list = startup_list[startup_list['employee_count'].isin(
+            filterSize)]
     if filterPhase:
-        startup_list = startup_list[startup_list['last_funding_round'] ==
-                                    filterPhase]
+        filterPhase = filterPhase.split(',')
+        startup_list = startup_list[startup_list['last_funding_round'].isin(
+            filterPhase)]
     if filterCountry:
-        startup_list = startup_list[startup_list['country'] == filterCountry]
+        filterCountry = filterCountry.split(',')
+        startup_list = startup_list[startup_list['country'].isin(
+            filterCountry)]
     if filterCategory:
         startup_list = startup_list[
             startup_list['category_groups_list'].str.contains(filterCategory)]
