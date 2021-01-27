@@ -73,13 +73,16 @@ def get_startup_features():
 @app.route("/get_features")
 def get_features():
     uuid = request.args.get('uuid')
+    show_zero = request.args.get('show_zero')
     x = request.args.get('x_axis')
     y = request.args.get('y_axis')
 
     startup_group_index = findGroupIndex(uuid)
 
-    filtered_features = predictions[startup_group_index][
-        predictions[startup_group_index][x] != 0]
+    filtered_features = predictions[startup_group_index].copy()
+    if show_zero == "False":
+        filtered_features = predictions[startup_group_index][
+            predictions[startup_group_index][x] != 0]
 
     total_num_values = len(filtered_features)
     selected_index = [0, total_num_values - 1]
