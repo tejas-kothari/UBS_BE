@@ -16,12 +16,19 @@ predictions = {}
 predictions[1] = pd.read_csv("csv/predictions_1.csv")
 predictions[2] = pd.read_csv("csv/predictions_2.csv")
 predictions[3] = pd.read_csv("csv/predictions_3.csv")
+shap = pd.read_csv("csv/model2_shap.csv")
 print("done reading csv")
 
 app = Flask(__name__)
 CORS(
     app,
     origins=[r'http://localhost:.*', r'^https:\/\/temg4952a-team1.*.web\.app'])
+
+
+def findGroupIndex(uuid):
+    for index in predictions:
+        if predictions[index]['org_uuid'].str.contains(uuid).any():
+            return index
 
 
 @app.route("/time")
@@ -68,6 +75,18 @@ def get_startup_features():
         predictions[startup_group_index]["org_uuid"] == uuid].iloc[0]
     startup_features = seriesToDict(startup_features_row)
     return startup_features
+
+
+@app.route("/get_startup_shap")
+def get_startup_shap():
+    uuid = request.args.get('uuid')
+    startup_group_index = findGroupIndex(uuid)
+
+    if startup_group_index == 2:
+        shap_values = shap[shap['org_uuid'] == uuid].iloc[0]
+        return seriesToDict(shap_values)
+    else:
+        return {}
 
 
 @app.route("/get_features")
@@ -194,12 +213,6 @@ def get_feature_importance():
         importance[index] = seriesToDict(model[index].iloc[0])
 
     return importance
-
-
-def findGroupIndex(uuid):
-    for index in predictions:
-        if predictions[index]['org_uuid'].str.contains(uuid).any():
-            return index
 
 
 if __name__ == '__main__':
